@@ -1,1 +1,0 @@
-{"name":"hidden-hippo-storybook","version":"0.1.0","type":"module","private":true,"scripts":{"test":"node tests/flow.mjs","start":"python3 -m http.server 8080 --directory dist"}}
