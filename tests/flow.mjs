@@ -1,0 +1,15 @@
+import vm from 'node:vm';import fs from 'node:fs';import assert from 'node:assert/strict';import * as engine from '../dist/engine.js';
+const elements=new Map(), listeners={},images=[];let clock=1000,frame;const noop=()=>{};const g=new Proxy({getImageData:()=>({data:new Uint8ClampedArray(16*16*4).fill(255)})},{get:(o,p)=>p in o?o[p]:noop,set:(o,p,v)=>(o[p]=v,true)});function element(id){if(!elements.has(id))elements.set(id,{id,hidden:false,textContent:'',innerHTML:'',open:false,classList:{add:noop,remove:noop},getContext:()=>g,addEventListener:(event,fn)=>listeners[id+':'+event]=fn,setPointerCapture:noop,showModal(){this.open=true},close(){this.open=false},click(){this.onclick?.()}});return elements.get(id)}let store=JSON.stringify({tutorial:true,settings:{music:false,sfx:false},records:{},runs:0});const sandbox={...engine,assert,console,document:{getElementById:element,createElement:()=>element('offscreen'),addEventListener:noop},window:{addEventListener:noop},innerWidth:844,innerHeight:390,devicePixelRatio:2,Image:class{constructor(){images.push(this);this.width=this.height=16;this.naturalWidth=16;this.complete=true}},localStorage:{getItem:()=>store,setItem:(_,v)=>store=v},performance:{now:()=>clock},requestAnimationFrame:fn=>frame=fn,setTimeout:()=>1,clearTimeout:noop,setInterval:()=>1,clearInterval:noop};vm.createContext(sandbox);let src=fs.readFileSync('dist/game.js','utf8').replace(/^import[^;]+;/,'');vm.runInContext(src,sandbox);for(const im of images)im.onload?.();
+vm.runInContext(`
+start();assert.equal(targets.length,10);assert.equal(preset,'A');setAim(true);resetCamera();
+const target=targets[0];let point=toScreen(target.x,target.y-target.h/2,cam);aim=point;shoot();assert.equal(targets.filter(t=>t.found).length,1);shoot();assert.equal(targets.filter(t=>t.found).length,1);assert.equal(misses,1);
+useHint();assert.equal(hints,1);assert.ok(hintArea);assert.equal(targets.find(t=>!t.found).found,false);
+showDialog('pause');let before=elapsed;draw(last+10000);assert.equal(elapsed,before);closeDialog();assert.equal(phase,'playing');
+for(const t of targets.filter(t=>!t.found)){aim=toScreen(t.x,t.y-t.h/2,cam);shoot()}assert.equal(phase,'won');assert.ok(saved.records.timed);closeDialog();assert.equal(phase,'menu');
+mode='casual';start();assert.equal(preset,'B');setAim(true);resetCamera();
+for(const factor of [1.25,1.8,.6])zoom(factor);
+for(const t of targets){aim=toScreen(t.x,t.y-t.h/2,cam);shoot()}assert.equal(phase,'won');assert.ok(saved.records.casual);assert.ok(saved.records.timed);assert.equal(saved.records.casual.score,1000);closeDialog();
+mode='timed';start();elapsed=299.9;draw(last+200);assert.equal(phase,'lost');assert.equal(elapsed,300);closeDialog();assert.equal(phase,'menu');start();assert.equal(phase,'playing');
+useHint();useHint();useHint();useHint();assert.equal(hints,3);assert.equal($('hint').disabled,true);
+console.log('PASS: mobile-sized flow, A/B wins, duplicate prevention, hint limits, pause, independent records, transformed hits, timeout, retry, result close');
+`,sandbox);
