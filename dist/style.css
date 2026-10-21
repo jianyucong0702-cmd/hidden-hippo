@@ -3,3 +3,5 @@
 @media(max-height:480px) and (orientation:landscape){footer{display:none}}
 
 #loadingStatus{font-size:11px;line-height:1.6;color:#c6cbb8;margin:8px 0}button:disabled{cursor:wait;opacity:.65}.chapter-row{width:100%;text-align:left;color:#2a4033}.chapter-row:disabled{cursor:default}.chapter-row:not(:disabled):hover{background:#e4dbc6}@media(max-height:480px){#loadingStatus{font-size:9px;margin:5px 0}.menu-links{margin-top:8px}}
+
+#playTips{position:absolute;left:50%;bottom:calc(78px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;gap:5px;align-items:center;max-width:calc(100% - 24px);padding:7px 12px;border-radius:10px;background:#1d332bdd;pointer-events:none;text-align:center}#playTips #modeTip,#playTips #portraitTip{position:static;transform:none;background:none;padding:0;white-space:normal;font-size:10px;line-height:1.5;max-width:100%}#playTips #portraitTip{display:none;color:#dfce9e}@media(orientation:portrait){#playTips #portraitTip{display:block}}@media(max-height:480px) and (orientation:landscape){#playTips{bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:5px 10px}#playTips #modeTip{font-size:9px}}
